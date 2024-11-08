@@ -52,7 +52,7 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((i, index) =>
 
         <div class="grid gap-2">
           <span class="text-sm font-semibold">No. of Booking/Session</span>
-          <input type="text" placeholder="Type here" class="input w-full max-w-xs" />
+          <input type="number" placeholder="Type here" class="input w-full max-w-xs" />
         </div>
 
         <div>
@@ -65,9 +65,9 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((i, index) =>
         </div>
       </form>
 
-      <div class="border rounded-lg mt-4 p-4">
+      <div class="border rounded-lg my-4 p-4">
         <h2 class="text-lg font-bold flex gap-2 items-center">Availability</h2>
-        <span>Set your weekly recurring schedule</span>
+        <span class="text-gray-500">Set your weekly recurring schedule</span>
         <div>
           <AvailabilityItem
             v-for="day in DAYS"
@@ -79,6 +79,8 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((i, index) =>
           />
         </div>
       </div>
+
+      <button class="btn btn-neutral">Save</button>
     </div>
   </div>
 </template>
