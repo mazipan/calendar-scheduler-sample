@@ -1,10 +1,6 @@
 import type { TimeConfig } from '@/types/TimeSlot'
 import dayjs from 'dayjs'
 
-import localeData from 'dayjs/plugin/localeData'
-
-dayjs.extend(localeData)
-
 export const getDayjs = () => {
   return dayjs()
 }
@@ -23,13 +19,17 @@ export const generateTimes = () => {
   let instanceStart = dayjs(dStart)
   const instanceEnd = dayjs(dEnd)
   const result: TimeConfig[] = []
+
   while (instanceStart < instanceEnd) {
+    const dayjs = instanceStart
+
     result.push({
-      time: instanceStart.format('h:mm'),
-      meridium: instanceStart.format('a') as 'am' | 'pm',
+      dayjs: dayjs,
+      time: dayjs.format('h:mm'),
+      meridium: dayjs.format('a') as 'am' | 'pm',
     })
 
-    instanceStart = instanceStart.add(15, 'minutes')
+    instanceStart = dayjs.add(15, 'minutes')
   }
 
   return result
