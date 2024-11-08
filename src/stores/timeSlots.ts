@@ -4,7 +4,11 @@ import { nanoid } from 'nanoid'
 import dayjs from 'dayjs'
 import { useStorage } from '@vueuse/core'
 
-export const STORAGE_KEY = 'time-slot'
+export const STORAGE_KEY = {
+  TIMESLOT: 'time-slot',
+  SETTINGS: 'settings',
+}
+
 export const getNewSlotItem = () => {
   const dStart = new Date()
   dStart.setHours(7, 0, 0, 0)
@@ -53,11 +57,26 @@ export const useTimeslotStore = defineStore('timeSlot', () => {
     },
   }
 
-  const defaultVal = useStorage(STORAGE_KEY, initState, localStorage, {
+  const defaultSlotsFromStorage = useStorage(STORAGE_KEY.TIMESLOT, initState, localStorage, {
     mergeDefaults: true,
   })
 
-  const timeslots = ref(defaultVal)
+  const timeslots = ref(defaultSlotsFromStorage)
 
-  return { timeslots }
+  const defaultSettingsFromStorage = useStorage(
+    STORAGE_KEY.SETTINGS,
+    {
+      duration: 0,
+      noOfBooking: 0,
+      isAllowVidCall: false,
+    },
+    localStorage,
+    {
+      mergeDefaults: true,
+    },
+  )
+
+  const settings = ref(defaultSettingsFromStorage)
+
+  return { timeslots, settings }
 })

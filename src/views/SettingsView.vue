@@ -2,11 +2,8 @@
 import AvailabilityItem from '@/components/AvailabilityItem.vue'
 import { STORAGE_KEY, useTimeslotStore } from '@/stores/timeSlots'
 import { AdjustmentsHorizontalIcon } from '@heroicons/vue/16/solid'
-import { onMounted } from 'vue'
 
 const store = useTimeslotStore()
-const isAllow = defineModel<boolean>('isAllow')
-const duration = defineModel<string>('duration')
 const OPTIONS = ['15', '30', '45', '60', '90'].map((i) => {
   return {
     value: i,
@@ -21,8 +18,16 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((i, index) =>
   }
 })
 
+const handleToggleAllowVidCall = () => {
+  store.settings = {
+    ...store.settings,
+    isAllowVidCall: !store.settings.isAllowVidCall,
+  }
+}
+
 const handleSave = () => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(store.timeslots))
+  localStorage.setItem(STORAGE_KEY.TIMESLOT, JSON.stringify(store.timeslots))
+  localStorage.setItem(STORAGE_KEY.SETTINGS, JSON.stringify(store.settings))
 }
 </script>
 
@@ -38,7 +43,20 @@ const handleSave = () => {
       <form class="space-y-4">
         <div class="grid gap-2">
           <span class="text-sm font-semibold">Visit Duration</span>
-          <select className="select w-full max-w-xs" :model="duration">
+          <select
+            className="select w-full max-w-xs"
+            :value="store?.settings?.duration"
+            v-on:change="
+              (e: Event) => {
+                const newVal = (e?.target as HTMLInputElement)?.value
+
+                store.settings = {
+                  ...store.settings,
+                  duration: Number.parseInt(newVal, 10),
+                }
+              }
+            "
+          >
             <option v-for="option in OPTIONS" :key="option.value" :value="option.value">
               {{ option.label }}
             </option>
@@ -47,13 +65,33 @@ const handleSave = () => {
 
         <div class="grid gap-2">
           <span class="text-sm font-semibold">No. of Booking/Session</span>
-          <input type="number" placeholder="Type here" class="input w-full max-w-xs" />
+          <input
+            type="number"
+            placeholder="Type here"
+            :value="store.settings.noOfBooking"
+            v-on:change="
+              (e: Event) => {
+                const newVal = (e?.target as HTMLInputElement)?.value || '0'
+
+                store.settings = {
+                  ...store.settings,
+                  noOfBooking: Number.parseInt(newVal, 10),
+                }
+              }
+            "
+            class="input w-full max-w-xs"
+          />
         </div>
 
         <div>
           <div class="form-control">
             <label class="label cursor-pointer justify-start gap-2">
-              <input type="checkbox" :checked="isAllow" class="checkbox" />
+              <input
+                type="checkbox"
+                :checked="store.settings.isAllowVidCall"
+                v-on:click="handleToggleAllowVidCall"
+                class="checkbox"
+              />
               <span class="label-text">Allow video tour call</span>
             </label>
           </div>
