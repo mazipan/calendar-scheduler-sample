@@ -2,18 +2,6 @@
 import AvailabilityItem from '@/components/AvailabilityItem.vue'
 import { AdjustmentsHorizontalIcon } from '@heroicons/vue/16/solid'
 
-const checks = defineModel<Record<string, boolean>>({
-  default: {
-    '1': false,
-    '2': false,
-    '3': false,
-    '4': false,
-    '5': false,
-    '6': false,
-    '7': false,
-  },
-})
-
 const isAllow = defineModel<boolean>('isAllow')
 const duration = defineModel<string>('duration')
 const OPTIONS = ['15', '30', '45', '60', '90'].map((i) => {
@@ -25,7 +13,7 @@ const OPTIONS = ['15', '30', '45', '60', '90'].map((i) => {
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((i, index) => {
   return {
-    value: `${index}`,
+    value: `${index + 1}`,
     label: i,
   }
 })
@@ -71,10 +59,9 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((i, index) =>
         <div>
           <AvailabilityItem
             v-for="day in DAYS"
-            :key="`${day.value}${checks[day.value]}`"
+            :key="`${day.value.toString()}`"
             :text="day.label"
-            :value="day.value"
-            :checked="checks[day.value]"
+            :value="day.value.toString()"
             :isLeaf="day.label === 'Sun'"
           />
         </div>
