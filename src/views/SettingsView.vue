@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import AvailabilityItem from '@/components/AvailabilityItem.vue'
+import { STORAGE_KEY, useTimeslotStore } from '@/stores/timeSlots'
 import { AdjustmentsHorizontalIcon } from '@heroicons/vue/16/solid'
+import { onMounted } from 'vue'
 
+const store = useTimeslotStore()
 const isAllow = defineModel<boolean>('isAllow')
 const duration = defineModel<string>('duration')
 const OPTIONS = ['15', '30', '45', '60', '90'].map((i) => {
@@ -17,6 +20,10 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((i, index) =>
     label: i,
   }
 })
+
+const handleSave = () => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(store.timeslots))
+}
 </script>
 
 <template>
@@ -67,7 +74,7 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((i, index) =>
         </div>
       </div>
 
-      <button class="btn btn-neutral">Save</button>
+      <button class="btn btn-neutral" v-on:click="handleSave">Save</button>
     </div>
   </div>
 </template>

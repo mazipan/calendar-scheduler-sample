@@ -2,7 +2,9 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { nanoid } from 'nanoid'
 import dayjs from 'dayjs'
+import { useStorage } from '@vueuse/core'
 
+export const STORAGE_KEY = 'time-slot'
 export const getNewSlotItem = () => {
   const dStart = new Date()
   dStart.setHours(7, 0, 0, 0)
@@ -20,7 +22,7 @@ export const getNewSlotItem = () => {
 export const useTimeslotStore = defineStore('timeSlot', () => {
   const defaultSlots = getNewSlotItem()
 
-  const timeslots = ref({
+  const initState = {
     '1': {
       active: false,
       slots: [defaultSlots],
@@ -49,7 +51,13 @@ export const useTimeslotStore = defineStore('timeSlot', () => {
       active: false,
       slots: [defaultSlots],
     },
+  }
+
+  const defaultVal = useStorage(STORAGE_KEY, initState, localStorage, {
+    mergeDefaults: true,
   })
+
+  const timeslots = ref(defaultVal)
 
   return { timeslots }
 })

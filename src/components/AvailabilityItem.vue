@@ -130,6 +130,7 @@ const handleUpdateEnd = ({ val, id }: { val: string; id: string }) => {
         <div class="flex gap-2 items-center" v-for="slot in currentTimeSlot?.slots" :key="slot?.id">
           <select
             className="select max-w-[150px]"
+            :value="currentTimeSlot?.slots?.find((i) => i.id === slot.id)?.start"
             v-on:change="
               (e: Event) => {
                 const newVal = (e?.target as HTMLInputElement)?.value
@@ -151,6 +152,7 @@ const handleUpdateEnd = ({ val, id }: { val: string; id: string }) => {
           <span>-</span>
           <select
             className="select max-w-[150px]"
+            :value="currentTimeSlot?.slots?.find((i) => i.id === slot.id)?.end"
             v-on:change="
               (e: Event) => {
                 const newVal = (e?.target as HTMLInputElement)?.value
