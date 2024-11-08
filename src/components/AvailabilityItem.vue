@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { generateTimes } from '@/libs/date'
-import { useTimeslotStore } from '@/stores/timeSlots'
+import { getNewSlotItem, useTimeslotStore } from '@/stores/timeSlots'
 import type { DayKey, TimeConfig } from '@/types/TimeSlot'
 import { DocumentDuplicateIcon, PlusCircleIcon, XCircleIcon } from '@heroicons/vue/24/outline'
-import { nanoid } from 'nanoid'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 
 const store = useTimeslotStore()
-const timeSlots = ref<string[]>([nanoid()])
 const { text, value, isLeaf } = defineProps<{ text: string; value: string; isLeaf: boolean }>()
 
 const TIMES: TimeConfig[] = generateTimes()
@@ -15,12 +13,28 @@ const TIMES: TimeConfig[] = generateTimes()
 const currentTimeSlot = computed(() => store.timeslots[value?.toString() as DayKey])
 
 const handleAddNewTimeSlot = () => {
-  timeSlots.value = [...timeSlots.value, nanoid()]
+  const newVal = {
+    ...store.timeslots,
+    [value as DayKey]: {
+      active: currentTimeSlot.value.active,
+      slots: [...currentTimeSlot.value.slots, getNewSlotItem()],
+    },
+  }
+
+  store.timeslots = newVal
 }
 
 const handleDeleteTimeSlot = (id: string) => {
-  if (timeSlots.value.length > 1) {
-    timeSlots.value = timeSlots.value.filter((i) => i !== id)
+  if (currentTimeSlot.value.slots.length > 1) {
+    const newVal = {
+      ...store.timeslots,
+      [value as DayKey]: {
+        active: currentTimeSlot.value.active,
+        slots: currentTimeSlot.value.slots.filter((i) => i.id !== id),
+      },
+    }
+
+    store.timeslots = newVal
   }
 }
 
@@ -57,7 +71,7 @@ const handleToggleActive = () => {
     </div>
     <template v-if="currentTimeSlot?.active">
       <div class="grid gap-2">
-        <div class="flex gap-2 items-center" v-for="id in timeSlots" :key="id">
+        <div class="flex gap-2 items-center" v-for="slot in currentTimeSlot?.slots" :key="slot?.id">
           <select className="select max-w-[150px]">
             <option
               v-for="t in TIMES"
@@ -82,7 +96,7 @@ const handleToggleActive = () => {
             class="btn btn-sm btn-square btn-ghost"
             v-on:click="
               () => {
-                handleDeleteTimeSlot(id)
+                handleDeleteTimeSlot(slot?.id)
               }
             "
           >
