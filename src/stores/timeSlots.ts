@@ -10,8 +10,8 @@ export const getNewSlotItem = () => {
 
   const defaultSlots = {
     id: nanoid(),
-    start: instanceStart,
-    end: instanceStart,
+    start: instanceStart.format('h:mm.a'),
+    end: instanceStart.format('h:mm.a'),
   }
 
   return defaultSlots

@@ -49,6 +49,62 @@ const handleToggleActive = () => {
 
   store.timeslots = newVal
 }
+
+const handleUpdateStart = ({ val, id }: { val: string; id: string }) => {
+  const manipulatedSlots = currentTimeSlot.value.slots.map((s) => {
+    if (s.id === id) {
+      return {
+        id: s.id,
+        start: val,
+        end: s.end,
+      }
+    }
+
+    return {
+      id: s.id,
+      start: s.start,
+      end: s.end,
+    }
+  })
+
+  const newVal = {
+    ...store.timeslots,
+    [value as DayKey]: {
+      active: currentTimeSlot.value.active,
+      slots: manipulatedSlots,
+    },
+  }
+
+  store.timeslots = newVal
+}
+
+const handleUpdateEnd = ({ val, id }: { val: string; id: string }) => {
+  const manipulatedSlots = currentTimeSlot.value.slots.map((s) => {
+    if (s.id === id) {
+      return {
+        id: s.id,
+        start: s.start,
+        end: val,
+      }
+    }
+
+    return {
+      id: s.id,
+      start: s.start,
+      end: s.end,
+    }
+  })
+
+  const newVal = {
+    ...store.timeslots,
+    [value as DayKey]: {
+      active: currentTimeSlot.value.active,
+      slots: manipulatedSlots,
+    },
+  }
+
+  store.timeslots = newVal
+}
 </script>
 
 <template>
@@ -72,7 +128,18 @@ const handleToggleActive = () => {
     <template v-if="currentTimeSlot?.active">
       <div class="grid gap-2">
         <div class="flex gap-2 items-center" v-for="slot in currentTimeSlot?.slots" :key="slot?.id">
-          <select className="select max-w-[150px]">
+          <select
+            className="select max-w-[150px]"
+            v-on:change="
+              (e: Event) => {
+                const newVal = (e?.target as HTMLInputElement)?.value
+                handleUpdateStart({
+                  val: newVal,
+                  id: slot?.id,
+                })
+              }
+            "
+          >
             <option
               v-for="t in TIMES"
               :key="`${t.time}.${t.meridium}`"
@@ -82,7 +149,18 @@ const handleToggleActive = () => {
             </option>
           </select>
           <span>-</span>
-          <select className="select max-w-[150px]">
+          <select
+            className="select max-w-[150px]"
+            v-on:change="
+              (e: Event) => {
+                const newVal = (e?.target as HTMLInputElement)?.value
+                handleUpdateEnd({
+                  val: newVal,
+                  id: slot?.id,
+                })
+              }
+            "
+          >
             <option
               v-for="t in TIMES"
               :key="`${t.time}.${t.meridium}`"
