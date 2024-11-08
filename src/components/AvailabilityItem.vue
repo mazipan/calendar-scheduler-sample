@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { generateTimes } from '@/libs/date'
+import type { TimeConfig } from '@/types/TimeSlot'
 import { DocumentDuplicateIcon, PlusCircleIcon, XCircleIcon } from '@heroicons/vue/24/outline'
 import { nanoid } from 'nanoid'
 import { ref } from 'vue'
@@ -7,47 +9,7 @@ const timeSlots = ref<string[]>([nanoid()])
 
 const checked = defineModel<boolean>('checked')
 const { text, value, isLeaf } = defineProps<{ text: string; value: string; isLeaf: boolean }>()
-type Time = {
-  time: string
-  meridium: 'am' | 'pm'
-}
-const TIMES: Time[] = [
-  { time: '7', meridium: 'am' },
-  { time: '8', meridium: 'am' },
-  { time: '9', meridium: 'am' },
-  { time: '10', meridium: 'am' },
-  { time: '11', meridium: 'am' },
-  { time: '12', meridium: 'am' },
-  { time: '1', meridium: 'pm' },
-  { time: '2', meridium: 'pm' },
-  { time: '3', meridium: 'pm' },
-  { time: '4', meridium: 'pm' },
-  { time: '5', meridium: 'pm' },
-  { time: '6', meridium: 'pm' },
-  { time: '7', meridium: 'pm' },
-].reduce((acc, curr) => {
-  if (curr) {
-    const minutes = ['00', '15', '30', '45']
-    if (curr.meridium === 'pm' && curr.time === '7') {
-      const t = {
-        time: `${curr.time}:00`,
-        meridium: curr.meridium,
-      } as Time
-
-      acc = [...acc, t]
-    } else {
-      const withMinutes: Time[] = minutes.map((m) => {
-        return {
-          time: `${curr.time}:${m}`,
-          meridium: curr.meridium,
-        } as Time
-      })
-      acc = [...acc, ...withMinutes]
-    }
-  }
-
-  return acc
-}, [] as Time[])
+const TIMES: TimeConfig[] = generateTimes()
 
 const handleAddNewTimeSlot = () => {
   timeSlots.value = [...timeSlots.value, nanoid()]
