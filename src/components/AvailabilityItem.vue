@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { generateTimes } from '@/libs/date'
+import { generateTimes, timeToDayJs } from '@/libs/date'
 import { getNewSlotItem, useTimeslotStore } from '@/stores/timeSlots'
 import type { DayKey, TimeConfig } from '@/types/TimeSlot'
 import { DocumentDuplicateIcon, PlusCircleIcon, XCircleIcon } from '@heroicons/vue/24/outline'
+import dayjs from 'dayjs'
 import { computed } from 'vue'
 
 const store = useTimeslotStore()
@@ -13,18 +14,22 @@ const TIMES: TimeConfig[] = generateTimes()
 const currentTimeSlot = computed(() => store.timeslots[value?.toString() as DayKey])
 
 const handleAddNewTimeSlot = () => {
-  const newVal = {
-    ...store.timeslots,
-    [value as DayKey]: {
-      active: currentTimeSlot.value.active,
-      slots: [...currentTimeSlot.value.slots, getNewSlotItem()],
-    },
-  }
+  // Make sure it doesn't overflow the number of booking setting
+  if (currentTimeSlot.value.slots.length < store.settings.noOfBooking) {
+    const newVal = {
+      ...store.timeslots,
+      [value as DayKey]: {
+        active: currentTimeSlot.value.active,
+        slots: [...currentTimeSlot.value.slots, getNewSlotItem(store.settings.duration)],
+      },
+    }
 
-  store.timeslots = newVal
+    store.timeslots = newVal
+  }
 }
 
 const handleDeleteTimeSlot = (id: string) => {
+  // At least it still have one slot
   if (currentTimeSlot.value.slots.length > 1) {
     const newVal = {
       ...store.timeslots,
@@ -39,11 +44,12 @@ const handleDeleteTimeSlot = (id: string) => {
 }
 
 const handleToggleActive = () => {
+  const nextValue = !currentTimeSlot.value.active
   const newVal = {
     ...store.timeslots,
     [value as DayKey]: {
-      active: !currentTimeSlot.value.active,
-      slots: currentTimeSlot.value.slots,
+      active: nextValue,
+      slots: !nextValue ? [] : [getNewSlotItem(store.settings.duration)],
     },
   }
 
@@ -51,40 +57,16 @@ const handleToggleActive = () => {
 }
 
 const handleUpdateStart = ({ val, id }: { val: string; id: string }) => {
+  // Auto assign dateEnd
+  const dayjsStart = timeToDayJs(val, dayjs())
+  const dayjsEnd = dayjsStart.add(store.settings.duration, 'minutes')
+
   const manipulatedSlots = currentTimeSlot.value.slots.map((s) => {
     if (s.id === id) {
       return {
         id: s.id,
         start: val,
-        end: s.end,
-      }
-    }
-
-    return {
-      id: s.id,
-      start: s.start,
-      end: s.end,
-    }
-  })
-
-  const newVal = {
-    ...store.timeslots,
-    [value as DayKey]: {
-      active: currentTimeSlot.value.active,
-      slots: manipulatedSlots,
-    },
-  }
-
-  store.timeslots = newVal
-}
-
-const handleUpdateEnd = ({ val, id }: { val: string; id: string }) => {
-  const manipulatedSlots = currentTimeSlot.value.slots.map((s) => {
-    if (s.id === id) {
-      return {
-        id: s.id,
-        start: s.start,
-        end: val,
+        end: dayjsEnd.format('h:mm.a'),
       }
     }
 
@@ -152,18 +134,11 @@ const handleUpdateEnd = ({ val, id }: { val: string; id: string }) => {
           <span>-</span>
           <select
             className="select max-w-[150px]"
+            disabled
             :value="currentTimeSlot?.slots?.find((i) => i.id === slot.id)?.end"
-            v-on:change="
-              (e: Event) => {
-                const newVal = (e?.target as HTMLInputElement)?.value
-                handleUpdateEnd({
-                  val: newVal,
-                  id: slot?.id,
-                })
-              }
-            "
           >
             <option
+              disabled
               v-for="t in TIMES"
               :key="`${t.time}.${t.meridium}`"
               :value="`${t.time}.${t.meridium}`"

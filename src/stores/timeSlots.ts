@@ -9,22 +9,39 @@ export const STORAGE_KEY = {
   SETTINGS: 'settings',
 }
 
-export const getNewSlotItem = () => {
+export const getNewSlotItem = (duration = 0) => {
   const dStart = new Date()
   dStart.setHours(7, 0, 0, 0)
   const instanceStart = dayjs(dStart)
+  let instanceEnd = instanceStart
+  if (duration) {
+    instanceEnd = instanceStart.add(duration, 'minutes')
+  }
 
   const defaultSlots = {
     id: nanoid(),
     start: instanceStart.format('h:mm.a'),
-    end: instanceStart.format('h:mm.a'),
+    end: instanceEnd.format('h:mm.a'),
   }
 
   return defaultSlots
 }
 
 export const useTimeslotStore = defineStore('timeSlot', () => {
-  const defaultSlots = getNewSlotItem()
+  const defaultSettingsFromStorage = useStorage(
+    STORAGE_KEY.SETTINGS,
+    {
+      duration: 15,
+      noOfBooking: 1,
+      isAllowVidCall: false,
+    },
+    localStorage,
+    {
+      mergeDefaults: true,
+    },
+  )
+
+  const defaultSlots = getNewSlotItem(defaultSettingsFromStorage.value.duration)
 
   const initState = {
     '1': {
@@ -62,19 +79,6 @@ export const useTimeslotStore = defineStore('timeSlot', () => {
   })
 
   const timeslots = ref(defaultSlotsFromStorage)
-
-  const defaultSettingsFromStorage = useStorage(
-    STORAGE_KEY.SETTINGS,
-    {
-      duration: 0,
-      noOfBooking: 0,
-      isAllowVidCall: false,
-    },
-    localStorage,
-    {
-      mergeDefaults: true,
-    },
-  )
 
   const settings = ref(defaultSettingsFromStorage)
 
