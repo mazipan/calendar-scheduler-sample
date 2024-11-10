@@ -1,5 +1,9 @@
 # calendar-scheduler
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/2dac0b0c-200f-4ed9-8099-6106fa2aaedf/deploy-status)](https://app.netlify.com/sites/calendar-scheduler-sample/deploys)
+
+Live: [calendar-scheduler-sample.netlify.app](https://calendar-scheduler-sample.netlify.app/)
+
 This template should help get you started developing with Vue 3 in Vite.
 
 ## Recommended IDE Setup
