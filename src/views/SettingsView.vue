@@ -44,7 +44,7 @@ const handleSave = () => {
         <div class="grid gap-2">
           <span class="text-sm font-semibold">Visit Duration</span>
           <select
-            className="select w-full max-w-xs"
+            className="select select-bordered w-full max-w-xs"
             :value="store?.settings?.duration"
             v-on:change="
               (e: Event) => {
@@ -79,7 +79,7 @@ const handleSave = () => {
                 }
               }
             "
-            class="input w-full max-w-xs"
+            class="input input-bordered w-full max-w-xs"
           />
         </div>
 

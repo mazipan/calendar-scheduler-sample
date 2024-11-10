@@ -4,8 +4,9 @@ import { getNewSlotItem, useTimeslotStore } from '@/stores/timeSlots'
 import type { DayKey, TimeConfig } from '@/types/TimeSlot'
 import { DocumentDuplicateIcon, PlusCircleIcon, XCircleIcon } from '@heroicons/vue/24/outline'
 import dayjs from 'dayjs'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
+const errorMessage = ref<string>('')
 const store = useTimeslotStore()
 const { text, value, isLeaf } = defineProps<{ text: string; value: string; isLeaf: boolean }>()
 
@@ -61,31 +62,39 @@ const handleUpdateStart = ({ val, id }: { val: string; id: string }) => {
   const dayjsStart = timeToDayJs(val, dayjs())
   const dayjsEnd = dayjsStart.add(store.settings.duration, 'minutes')
 
-  const manipulatedSlots = currentTimeSlot.value.slots.map((s) => {
-    if (s.id === id) {
+  const isContainsSame = currentTimeSlot.value.slots.find((s) => s.start === val)
+
+  if (!isContainsSame) {
+    errorMessage.value = ''
+    const manipulatedSlots = currentTimeSlot.value.slots.map((s) => {
+      if (s.id === id) {
+        return {
+          id: s.id,
+          start: val,
+          end: dayjsEnd.format('h:mm.a'),
+        }
+      }
+
       return {
         id: s.id,
-        start: val,
-        end: dayjsEnd.format('h:mm.a'),
+        start: s.start,
+        end: s.end,
       }
+    })
+
+    const newVal = {
+      ...store.timeslots,
+      [value as DayKey]: {
+        active: currentTimeSlot.value.active,
+        slots: manipulatedSlots,
+      },
     }
 
-    return {
-      id: s.id,
-      start: s.start,
-      end: s.end,
-    }
-  })
-
-  const newVal = {
-    ...store.timeslots,
-    [value as DayKey]: {
-      active: currentTimeSlot.value.active,
-      slots: manipulatedSlots,
-    },
+    store.timeslots = newVal
+  } else {
+    // TODO: Send toaster
+    errorMessage.value = 'You can not select the same start time within the same day.'
   }
-
-  store.timeslots = newVal
 }
 </script>
 
@@ -111,7 +120,7 @@ const handleUpdateStart = ({ val, id }: { val: string; id: string }) => {
       <div class="grid gap-2">
         <div class="flex gap-2 items-center" v-for="slot in currentTimeSlot?.slots" :key="slot?.id">
           <select
-            className="select max-w-[150px]"
+            className="select select-bordered max-w-[150px]"
             :value="currentTimeSlot?.slots?.find((i) => i.id === slot.id)?.start"
             v-on:change="
               (e: Event) => {
@@ -133,7 +142,7 @@ const handleUpdateStart = ({ val, id }: { val: string; id: string }) => {
           </select>
           <span>-</span>
           <select
-            className="select max-w-[150px]"
+            className="select select-bordered max-w-[150px]"
             disabled
             :value="currentTimeSlot?.slots?.find((i) => i.id === slot.id)?.end"
           >
@@ -167,5 +176,24 @@ const handleUpdateStart = ({ val, id }: { val: string; id: string }) => {
         </div>
       </div>
     </template>
+  </div>
+
+  <div class="toast toast-end toast-middle" v-if="errorMessage">
+    <div role="alert" class="alert alert-error">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-6 w-6 shrink-0 stroke-current"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      <span>{{ errorMessage }}</span>
+    </div>
   </div>
 </template>
